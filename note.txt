@@ -1,0 +1,14 @@
+https://medium.com/@charithwick/sending-emails-using-aws-ses-nodejs-460b8cc6d0d5
+===== first step ====
+create a  SNS topic and get(ARN)
+then go to dashboard option 
+and create a subscription, this subscription need ARN
+===== second step ====
+Go to SES page and click configuration set 
+then you configure to SNS in SES 
+
+==== 3 record provide aws to verify domain ====
+1. cname
+2. mx 
+3. txt 
+
