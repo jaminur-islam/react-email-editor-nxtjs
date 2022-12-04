@@ -11,9 +11,9 @@ export default async function handler(
     // const {senderEmail ,receiverEmailList ,templated }=req.body.data
   //  const response =  await sendEmailOnAws(senderEmail , receiverEmailList , templated);
     // console.log(response) 
-  await email()
-   
-  res.status(200).json({ name: 'good job' })
+ const data = await email()
+  console.log( data)
+  res.status(200).json(data)
   } catch(err) {
     console.log(err)
     res.send(err.message)

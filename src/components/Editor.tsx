@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 
-
+import parse, { domToReact } from "html-react-parser";
 import EmailEditor from "react-email-editor";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
@@ -20,9 +20,7 @@ export default function Editor() {
 
   const dispatch = useDispatch();
   const emailEditorRef = useRef(null);
-  const allTem = useSelector(
-    (state: any) => state?.emailTemplatedList?.emailTemplatedList
-  );
+  const allTem = useSelector((state: any) => state?.emailTemplatedList?.emailTemplatedList);
 
   /*   useEffect(() => {
     const data = localStorage.getItem("nn");
@@ -32,35 +30,39 @@ export default function Editor() {
   let htmlDesign;
 
   //======================= Send Email ===============================//
-  const sendEmail = () => {
-    axios.post("http://localhost:3000/api/send_email_api", {
+  const sendEmail = async () => {
+    const tep = await axios.post("http://localhost:3000/api/send_email_api", {
       data: {
         senderEmail: "sheikhanikbd@gmail.com",
         receiverEmailList: ["jaminurislam250@gmail.com"],
         templated: allTem[0],
       },
     });
+    console.log(parse(tep.data.Template.HtmlPart))
+   
   };
 
   //======================= Save design  ===============================//
   function saveDesign() {
     emailEditorRef.current.editor.saveDesign((design) => {
       // ====== set templated on localStor =========== //
-      localStorage.setItem("nn", JSON.stringify(design));
+      localStorage.setItem("templated", JSON.stringify(design));
     });
   }
 
   //======================= Export Html  ===============================//
   function exportHtml() {
     emailEditorRef.current.editor.exportHtml((data) => {
+      
       const { design, html } = data;
-      console.log(html);
+      dispatch(setEmailTemplated({design , html}));
+      localStorage.setItem("templated", JSON.stringify({html , design}));
       // console.log(design);
       // console.log(html);
 
       // ====== set templated on redux =========== //
 
-      dispatch(setEmailTemplated(`${html}`));
+     
       // console.log("exportHtml", html);
     });
   }
@@ -81,15 +83,16 @@ export default function Editor() {
     );
     // editor instance is created
     // you can load your template here;
-    htmlDesign = localStorage.getItem("nn");
-    emailEditorRef.current?.editor?.loadDesign(JSON.parse(htmlDesign));
+    htmlDesign = localStorage.getItem("templated");
+    emailEditorRef.current?.editor?.loadDesign(JSON.parse(htmlDesign)?.design);
   }
 
   //======================= Ready editor ===============================//
   function onReady() {
     // editor is ready
     console.log("onReady");
-    emailEditorRef.current?.editor?.loadDesign(JSON.parse(htmlDesign));
+    emailEditorRef.current?.editor?.loadDesign(JSON.parse(htmlDesign)?.design);
+  
   }
 
   return (
@@ -99,17 +102,18 @@ export default function Editor() {
           <button style={{ marginRight: "60px" }}>
             <Link href="/showlist">All templated</Link>
           </button>
-          <button
+         {/*  <button
             style={{ marginRight: "30px" }}
             onClick={() => dispatch(removeEmailTemplated())}
           >
             Remove design
           </button>
           <button style={{ marginRight: "30px" }} onClick={saveDesign}>
-            Save Design
-          </button>
+          Save Design
+          </button> */}
           <button style={{ marginRight: "60px" }} onClick={exportHtml}>
-            Export HTML
+            {/* Export HTML */}
+            Save Design
           </button>
           <button onClick={sendEmail}> Send Email</button>
         </div>
@@ -120,6 +124,7 @@ export default function Editor() {
             ref={emailEditorRef}
             onLoad={onLoad}
             onReady={onReady}
+       
 
             // tools={customTol}
           />

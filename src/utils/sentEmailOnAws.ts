@@ -1,4 +1,7 @@
 import  AWS from "aws-sdk"
+import { ListTemplatesCommand } from "@aws-sdk/client-ses";
+import { resolve } from "path";
+import { rejects } from "assert";
 
 const awsConfig = {
   accessKeyId: process.env.NEXT_PUBLIC_ACCESS_KEY,
@@ -27,19 +30,61 @@ const params = {
   "Source": "sheikhanikbd@gmail.com",
   "Template": "MyTemplate",
   "Destination": {
-
     "ToAddresses": ["jaminurislam250@gmail.com"]
   },
-  "TemplateData": "{ \"name\":\"my name is sagor thi is not true my name is jaminur\", \"favoriteanimal\": \"alligator\" }"
+  "TemplateData": JSON.stringify({name:"sagor", email:"sagor@gmail.com"})
 }
 
+
+
  const email = async () =>{
-  SES.sendTemplatedEmail(params, (err, data) =>  {
+
+  return new Promise((resolve , rejects)=>{
+    SES.getTemplate({TemplateName:"MyTemplate"} , async (err , data)=>{
+      if (err) console.log(err, err.stack); // an error occurred
+      else  resolve(data)
+    })
+  
+
+  })
+  
+
+
+  /* SES.createTemplate(params, (err, data) =>  {
     if (err) console.log(err, err.stack); // an error occurred
     else     console.log(data);           // successful response
   });
+ */
+
+  /* 
+  ses.updateTemplate(params, function(err, data) {
+  if (err) console.log(err, err.stack); // an error occurred
+  else     console.log(data);           // successful response
+});
+  */
+
+  /* SES.sendTemplatedEmail(params, (err, data) =>  {
+    if (err) console.log(err, err.stack); // an error occurred
+    else     console.log(data);           // successful response
+  }); */
+
+  /* SES.listTemplates({MaxItems: 2 , NextToken: null}, (err , data)=>{
+    if (err) console.log(err, err.stack); // an error occurred
+    else     console.log(data); 
+  }) */
+
+   
+  
+
+  /* SES.deleteTemplate({TemplateName:"MyTemplate"}, (err , data)=>{
+    if (err) console.log(err, err.stack); // an error occurred
+    else     console.log(data); 
+  })
+   */
+
   
 } 
+
 
 
 

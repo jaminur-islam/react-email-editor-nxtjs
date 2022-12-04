@@ -152,10 +152,14 @@ const options: any = {
     } */
   },
 };
-export default function ShowTemplated({ html }: any) {
+export default function ShowTemplated({ html , design }: any) {
   return (
     <div>
-      <Link href={"/"}>{parse(html, options)}</Link>
+      <Link href={"/"} onClick={()=>{
+        localStorage.setItem("templated", JSON.stringify({html , design}));
+      }}>{parse(html, options)}
+      
+      </Link>
     </div>
   );
 }
