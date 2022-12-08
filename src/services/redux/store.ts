@@ -1,10 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit'
 import {emailEditorSlice} from "./slice/emailEditorSlice"
+import { selectTem } from './slice/selectTemSlice'
 
 // config the store 
 const store= configureStore({
   reducer: {
-    emailTemplatedList: emailEditorSlice.reducer
+    emailTemplatedList: emailEditorSlice.reducer,
+    selectTem: selectTem.reducer,
   }
 })
 

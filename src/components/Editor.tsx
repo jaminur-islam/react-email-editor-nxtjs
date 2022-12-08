@@ -1,6 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-
-
 import parse, { domToReact } from "html-react-parser";
 import EmailEditor from "react-email-editor";
 import axios from "axios";
@@ -12,6 +10,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/router";
 import styled from "styled-components";
+import { setSelectTem } from "../services/redux/slice/selectTemSlice";
 
 export default function Editor() {
   //=========== style ===============//
@@ -20,27 +19,18 @@ export default function Editor() {
 
   const dispatch = useDispatch();
   const emailEditorRef = useRef(null);
-  const allTem = useSelector((state: any) => state?.emailTemplatedList?.emailTemplatedList);
+  const selectItem = useSelector((state: any) => state?.selectTem.selectTem);
+  console.log(selectItem)
 
   /*   useEffect(() => {
     const data = localStorage.getItem("nn");
     setTemplated(data);
   }, [router.pathname]); */
 
-  let htmlDesign;
+  
 
-  //======================= Send Email ===============================//
-  const sendEmail = async () => {
-    const tep = await axios.post("http://localhost:3000/api/send_email_api", {
-      data: {
-        senderEmail: "sheikhanikbd@gmail.com",
-        receiverEmailList: ["jaminurislam250@gmail.com"],
-        templated: allTem[0],
-      },
-    });
-    console.log(parse(tep.data.Template.HtmlPart))
-   
-  };
+
+
 
   //======================= Save design  ===============================//
   function saveDesign() {
@@ -52,24 +42,27 @@ export default function Editor() {
 
   //======================= Export Html  ===============================//
   function exportHtml() {
-    emailEditorRef.current.editor.exportHtml((data) => {
-      
+    emailEditorRef.current.editor.exportHtml(async(data) => {
       const { design, html } = data;
-      dispatch(setEmailTemplated({design , html}));
-      localStorage.setItem("templated", JSON.stringify({html , design}));
-      // console.log(design);
-      // console.log(html);
+      const saveTem  = await axios.post("http://localhost:3000/api/createTem", {
+        data: {
+         design ,
+         html ,
+         id: selectItem.id
+        },
+      })
+      dispatch(setSelectTem({design, html , id: selectItem.id}))
+      console.log(saveTem)
 
-      // ====== set templated on redux =========== //
+      // dispatch(setEmailTemplated({design , html}));
+      // localStorage.setItem("templated", JSON.stringify({html , design}));
 
-     
-      // console.log("exportHtml", html);
     });
   }
 
   //======================= OneLoad editor  ===============================//
   function onLoad() {
-    emailEditorRef?.current?.editor?.registerCallback(
+       emailEditorRef?.current?.editor?.registerCallback(
       "image",
       function (file, done) {
         /* console.log("HI hi ");
@@ -81,25 +74,70 @@ export default function Editor() {
         });
       }
     );
-    // editor instance is created
-    // you can load your template here;
-    htmlDesign = localStorage.getItem("templated");
-    emailEditorRef.current?.editor?.loadDesign(JSON.parse(htmlDesign)?.design);
+    
   }
 
-  //======================= Ready editor ===============================//
+  //======================= Ready editor and load design ===============================//
   function onReady() {
-    // editor is ready
-    console.log("onReady");
-    emailEditorRef.current?.editor?.loadDesign(JSON.parse(htmlDesign)?.design);
+    emailEditorRef.current?.editor?.loadDesign(selectItem.design); 
   
   }
+
+  const userList = [
+    {name: "sagor" , email:"jaminurislam250@gmail.com"},
+    {name: "softenin" , email:"dev.softenin@gmail.com"},
+  ]
+  const destination = userList.map(user =>{
+    return {
+      Destination: {
+        ToAddresses:[
+          user.email
+        ]},
+        ReplacementTemplateData: JSON.stringify({name: user.name , favoriteanimal: user.email})
+      
+    }
+  })
+  console.log(destination)
+
+    //======================= Send Email ===============================//
+    const sendEmail = async () => {
+      if(selectItem.html){
+        const tem = await axios.post("http://localhost:3000/api/send_multiple_email_api", {
+        data: {
+          senderEmail: "sheikhanikbd@gmail.com",
+          destination: destination ,
+          templated: selectItem.html
+        },
+      });
+       console.log(tem)
+      }else{
+        alert("Please save this templated")
+      }
+    };
+
+    //======================= Delete template ==============================//
+    const deleteTem = async () =>{ 
+      if(selectItem?.id){
+        const delTem  = await axios.post("http://localhost:3000/api/delTem", {
+          data: {
+            id: selectItem.id
+          }
+        })
+        dispatch(setSelectTem({}))
+        console.log(delTem)
+
+        }else{
+        console.log("not found")
+      }
+      
+     
+    }
 
   return (
     <div>
       <div>
         <div>
-          <button style={{ marginRight: "60px" }}>
+          <button onClick={()=> dispatch(setSelectTem({}))} style={{ marginRight: "60px" }}>
             <Link href="/showlist">All templated</Link>
           </button>
          {/*  <button
@@ -111,6 +149,12 @@ export default function Editor() {
           <button style={{ marginRight: "30px" }} onClick={saveDesign}>
           Save Design
           </button> */}
+          <button style={{ marginRight: "30px" }} onClick={()=>{
+            deleteTem()
+            // localStorage.removeItem("templated")
+          }}>
+           Delete 
+          </button> 
           <button style={{ marginRight: "60px" }} onClick={exportHtml}>
             {/* Export HTML */}
             Save Design
@@ -133,3 +177,33 @@ export default function Editor() {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+ /* 
+ [     
+       {        "Destination":{
+                "ToAddresses":[
+                  "jaminurislam250@gmail.com"
+                ]
+              },
+              "ReplacementTemplateData":"{ \"name\":\"jaminur\", \"favoriteanimal\":\"angelfish\""
+            },
+            {
+              "Destination":{ 
+                "ToAddresses":[
+                  "dev.softenin@gmail.com"
+                ]
+              },
+              "ReplacementTemplateData":"{ \"name\":\"softenin\", \"favoriteanimal\":\"lion\" }"
+        },
+    ], 
+  
+  */

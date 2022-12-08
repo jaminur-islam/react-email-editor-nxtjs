@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "EmailTem" ALTER COLUMN "emailTem" SET NOT NULL,
+ALTER COLUMN "emailTem" SET DATA TYPE TEXT;

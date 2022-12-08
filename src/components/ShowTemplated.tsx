@@ -1,6 +1,8 @@
 import React from "react";
 import parse, { domToReact } from "html-react-parser";
 import Link from "next/link";
+import { useDispatch } from "react-redux";
+import { setSelectTem } from "../services/redux/slice/selectTemSlice";
 
 /* const html = `
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -152,12 +154,15 @@ const options: any = {
     } */
   },
 };
-export default function ShowTemplated({ html , design }: any) {
+export default function ShowTemplated({ emailTem }: any) {
+  // console.log(emailTem)
+  const dispatch = useDispatch()
   return (
     <div>
       <Link href={"/"} onClick={()=>{
-        localStorage.setItem("templated", JSON.stringify({html , design}));
-      }}>{parse(html, options)}
+        dispatch(setSelectTem(emailTem))
+        /* localStorage.setItem("templated", JSON.stringify({html:emailTem.html ,design:emailTem.design , id : emailTem.id})); */
+      }}>{parse(emailTem.html, options)}
       
       </Link>
     </div>

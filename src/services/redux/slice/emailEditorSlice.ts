@@ -7,7 +7,7 @@ export const emailEditorSlice = createSlice({
   },
   reducers:{
        setEmailTemplated: (state , action)=>{
-           state.emailTemplatedList.unshift(action.payload)
+           state.emailTemplatedList = action.payload
        },
        removeEmailTemplated: (state)=>{
            state.emailTemplatedList.pop()
